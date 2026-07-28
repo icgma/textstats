@@ -51,44 +51,10 @@
   els.themeToggle.addEventListener("click", cycleTheme);
 
   // ---------- 核心统计 ----------
-  function analyze(text) {
-    const chars = [...text];
-    const charCount = chars.length;
-    const noSpace = chars.filter((c) => !/\s/.test(c)).length;
-    const cjk = (text.match(/[一-鿿㐀-䶿]/g) || []).length;
-    // 拉丁单词数（新闻稿里的英文/数字）
-    const words = (text.match(/[A-Za-z0-9]+/g) || []).length;
-    // 标点
-    const punct = (text.match(/[，。！？；：、,.\!?;:]/g) || []).length;
+  // 统计与重复词实现在 stats.js（有 test.js 覆盖），这里只做界面。
+  const S = globalThis.TextStats;
+  const { analyze, topRepeats, fmtTime } = S;
 
-    // 段落：以空行分隔
-    const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-
-    // 句子：以中文句末标点切分
-    const sentences = text
-      .split(/(?<=[。！？!?])/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    // 每句汉字数，用于长句判断
-    const sentenceCjk = sentences.map((s) => (s.match(/[一-鿿㐀-䶿]/g) || []).length);
-
-    return {
-      charCount, noSpace, cjk, words, punct,
-      paragraphs: paragraphs.length,
-      sentences: sentences.length,
-      sentences_raw: sentences,
-      sentenceCjk,
-    };
-  }
-
-  function fmtTime(totalMin) {
-    if (!isFinite(totalMin) || totalMin <= 0) return "0 秒";
-    const m = Math.floor(totalMin);
-    const s = Math.round((totalMin - m) * 60);
-    if (m === 0) return `${s} 秒`;
-    return s ? `${m} 分 ${s} 秒` : `${m} 分`;
-  }
 
   // ---------- 渲染 ----------
   function render(a) {
@@ -140,32 +106,6 @@
     }
   }
 
-  // 2-4 字连续汉字片段频次，过滤掉单字、虚词、标点
-  const STOP = new Set(["的话", "的是", "一个", "一些", "一种", "可以", "我们", "他们", "这个", "那个", "这是", "那是", "就是", "这样", "那样", "这是", "已经", "正在", "应当", "应该", "可能", "或者", "但是", "因为", "所以", "虽然", "然而", "不仅", "而且", "于是", "因此"]);
-  function topRepeats(text) {
-    const cjkOnly = text.match(/[一-鿿㐀-䶿]+/g) || [];
-    const freq = new Map();
-    for (const seg of cjkOnly) {
-      const arr = [...seg];
-      for (let len = 2; len <= 4; len++) {
-        for (let i = 0; i + len <= arr.length; i++) {
-          const w = arr.slice(i, i + len).join("");
-          if (STOP.has(w)) continue;
-          freq.set(w, (freq.get(w) || 0) + 1);
-        }
-      }
-    }
-    // 一个词若与更长词同源，倾向保留更长词；这里简单取频次≥3 的前 20
-    return [...freq.entries()]
-      .filter(([, n]) => n >= 3)
-      .sort((a, b) => b[1] - a[1] || b[0].length - a[0].length)
-      .slice(0, 20)
-      .map(([w, n]) => ({ w, n }))
-      .filter((x, _i, arr) => {
-        // 去掉被更长高频词包含的短词
-        return !arr.some((y) => y !== x && y.w.length > x.w.length && y.w.includes(x.w) && y.n >= x.n);
-      });
-  }
 
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
