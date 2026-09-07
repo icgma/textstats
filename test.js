@@ -89,6 +89,8 @@ function ok(name, cond) {
   eq("30 秒", S.fmtTime(0.5), "30 秒");
   eq("整分", S.fmtTime(2), "2 分");
   eq("分加秒", S.fmtTime(1.5), "1 分 30 秒");
+  eq("进位边界 0.999 分", S.fmtTime(0.999), "1 分");
+  eq("进位边界 1.999 分", S.fmtTime(1.999), "2 分");
   eq("NaN 按 0", S.fmtTime(NaN), "0 秒");
   eq("Infinity 按 0", S.fmtTime(Infinity), "0 秒");
 }

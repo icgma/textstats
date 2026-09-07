@@ -40,8 +40,9 @@
   // 时长格式化：秒 / 分 / 分+秒
   function fmtTime(totalMin) {
     if (!isFinite(totalMin) || totalMin <= 0) return "0 秒";
-    const m = Math.floor(totalMin);
-    const s = Math.round((totalMin - m) * 60);
+    const totalSeconds = Math.round(totalMin * 60);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
     if (m === 0) return `${s} 秒`;
     return s ? `${m} 分 ${s} 秒` : `${m} 分`;
   }
