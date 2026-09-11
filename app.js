@@ -52,7 +52,7 @@
 
   // ---------- 核心统计 ----------
   // 统计与重复词实现在 stats.js（有 test.js 覆盖），这里只做界面。
-  const S = globalThis.TextStats;
+  const S = globalThis.Stats;
   const { analyze, topRepeats, fmtTime } = S;
 
 
